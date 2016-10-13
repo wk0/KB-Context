@@ -1,5 +1,6 @@
 target/
 Databases/
+Database/
 Store/
 pom.xml.tag
 pom.xml.releaseBackup
