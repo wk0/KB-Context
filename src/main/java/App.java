@@ -5,14 +5,19 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.log4j.PropertyConfigurator;
 
+import java.io.FileInputStream;
+import java.util.Properties;
+
 public class App {
 
   public static void main(String[] args) {
-    //Gets an error with log4j, so need to manually point
-    // to the jena log4j property path
-    String log4jConfPath = "/home/wkelly3/Jena/apache-jena-3.1.0/jena-log4j.properties";
-    PropertyConfigurator.configure(log4jConfPath);
+    try {
+      Properties props = new Properties();
+      props.load(new FileInputStream("log4j.properties"));
+      PropertyConfigurator.configure(props);
+    } catch (Exception e) {
 
+    }
     // Code from:
     // http://www.iandickinson.me.uk/articles/jena-eclipse-helloworld/
     Model m = ModelFactory.createDefaultModel();
