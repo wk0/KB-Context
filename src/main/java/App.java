@@ -1,25 +1,28 @@
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.VCARD;
+import org.apache.log4j.PropertyConfigurator;
 
-/**
- * Created by gary on 10/2/16.
- */
 public class App {
-  static String personURI    = "http://somewhere/JohnSmith";
-  static String fullName     = "John Smith";
 
-  public static void main (String args[]) {
-    // create an empty model
-    Model model = ModelFactory.createDefaultModel();
+  public static void main(String[] args) {
+    //Gets an error with log4j, so need to manually point
+    // to the jena log4j property path
+    String log4jConfPath = "/home/wkelly3/Jena/apache-jena-3.1.0/jena-log4j.properties";
+    PropertyConfigurator.configure(log4jConfPath);
 
-    // create the resource
-    Resource johnSmith = model.createResource(personURI);
+    // Code from:
+    // http://www.iandickinson.me.uk/articles/jena-eclipse-helloworld/
+    Model m = ModelFactory.createDefaultModel();
+    String NS = "http://example.com/test";
 
-    // add the property
-    johnSmith.addProperty(VCARD.FN, fullName);
+    Resource r = m.createResource(NS + "r");
+    Property p = m.createProperty(NS + "p");
 
-    model.write(System.out, "RDF/XML-ABBREV");
+    r.addProperty(p, "hello world", XSDDatatype.XSDstring);
+    m.write(System.out, "Turtle");
+
   }
 }
