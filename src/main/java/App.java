@@ -1,6 +1,9 @@
 import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.reasoner.Reasoner;
+import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.log4j.PropertyConfigurator;
 
 import java.io.FileInputStream;
@@ -21,31 +24,52 @@ public class App {
 
     // String directory = "Database/TestDB";
     String directory = "Database/DB";
-    System.out.print("DB init");
+    System.out.print("DB init \n");
     Dataset dataset = TDBFactory.createDataset(directory);
-    System.out.print("DB created");
+    System.out.print("DB created \n");
     Model model = dataset.getDefaultModel() ;
-    System.out.print("DB loaded");
+    System.out.print("DB loaded \n");
 
-    StmtIterator iter = model.listStatements();
+    System.out.print("reason \n");
+
+    Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
+    reasoner = reasoner.bindSchema(model);
+
+    System.out.print("get owl \n");
+
+    InfModel infmodel = ModelFactory.createInfModel(reasoner, model);
+
+    System.out.print("info done \n");
+
+    Resource Aris = infmodel.getResource("http://dbpedia.org/ontology/Aristotle");
+    Resource Person = infmodel.getResource("http://dbpedia.org/ontology/Person");
+    if (infmodel.contains(Aris, RDF.type, Person)) {
+      System.out.println("Aristotle is a person.");
+    } else {
+      System.out.println("Aristotle was failed to be recognized as a person");
+    }
+
+    System.out.println("done");
+
+//    StmtIterator iter = model.listStatements();
 
     // print out the predicate, subject and object of each statement
-    while (iter.hasNext()) {
-      Statement stmt      = iter.nextStatement();         // get next statement
-      Resource  subject   = stmt.getSubject();   // get the subject
-      Property  predicate = stmt.getPredicate(); // get the predicate
-      RDFNode   object    = stmt.getObject();    // get the object
-
-      System.out.print(subject.toString());
-      System.out.print(" " + predicate.toString() + " ");
-      if (object instanceof Resource) {
-        System.out.print(object.toString());
-      } else {
-        // object is a literal
-        System.out.print(" \"" + object.toString() + "\"");
-      }
-      System.out.println(" .");
-    }
+//    while (iter.hasNext()) {
+//      Statement stmt      = iter.nextStatement();         // get next statement
+//      Resource  subject   = stmt.getSubject();   // get the subject
+//      Property  predicate = stmt.getPredicate(); // get the predicate
+//      RDFNode   object    = stmt.getObject();    // get the object
+//
+//      System.out.print(subject.toString());
+//      System.out.print(" " + predicate.toString() + " ");
+//      if (object instanceof Resource) {
+//        System.out.print(object.toString());
+//      } else {
+//        // object is a literal
+//        System.out.print(" \"" + object.toString() + "\"");
+//      }
+//      System.out.println(" .");
+//    }
   }
 
 }
