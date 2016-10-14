@@ -1,12 +1,12 @@
-import org.apache.jena.datatypes.xsd.XSDDatatype;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.*;
+import org.apache.jena.tdb.TDBFactory;
 import org.apache.log4j.PropertyConfigurator;
 
 import java.io.FileInputStream;
 import java.util.Properties;
+
+import static org.apache.jena.enhanced.BuiltinPersonalities.model;
 
 public class App {
 
@@ -18,16 +18,34 @@ public class App {
     } catch (Exception e) {
 
     }
-    // Code from:
-    // http://www.iandickinson.me.uk/articles/jena-eclipse-helloworld/
-    Model m = ModelFactory.createDefaultModel();
-    String NS = "http://example.com/test";
 
-    Resource r = m.createResource(NS + "r");
-    Property p = m.createProperty(NS + "p");
+    // String directory = "Database/TestDB";
+    String directory = "Database/DB";
+    System.out.print("DB init");
+    Dataset dataset = TDBFactory.createDataset(directory);
+    System.out.print("DB created");
+    Model model = dataset.getDefaultModel() ;
+    System.out.print("DB loaded");
 
-    r.addProperty(p, "hello world", XSDDatatype.XSDstring);
-    m.write(System.out, "Turtle");
+    StmtIterator iter = model.listStatements();
 
+    // print out the predicate, subject and object of each statement
+    while (iter.hasNext()) {
+      Statement stmt      = iter.nextStatement();         // get next statement
+      Resource  subject   = stmt.getSubject();   // get the subject
+      Property  predicate = stmt.getPredicate(); // get the predicate
+      RDFNode   object    = stmt.getObject();    // get the object
+
+      System.out.print(subject.toString());
+      System.out.print(" " + predicate.toString() + " ");
+      if (object instanceof Resource) {
+        System.out.print(object.toString());
+      } else {
+        // object is a literal
+        System.out.print(" \"" + object.toString() + "\"");
+      }
+      System.out.println(" .");
+    }
   }
+
 }

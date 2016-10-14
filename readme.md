@@ -64,3 +64,8 @@ Third, run command below, this command will create a database which contains all
 ```
 tdbloader2 --loc Database/DB Store/dbpedia_2014.owl Store/instance_types_en.nt Store/mappingbased_properties_en.nt Store/specific_mappingbased_properties_en.nt
 ```
+
+> Use TestDB
+```
+tdbloader2 --loc Database/TestDB test_data/pizza.owl.rdf test_data/cheeses-0.1.ttl
+```
