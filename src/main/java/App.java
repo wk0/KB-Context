@@ -1,20 +1,11 @@
-import org.apache.jena.base.Sys;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.datatypes.xsd.XSDDatatype;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.tdb.TDBFactory;
-import org.apache.jena.tdb.TDBLoader;
 import org.apache.log4j.PropertyConfigurator;
-import org.apache.jena.util.FileManager;
-import org.apache.jena.util.PrintUtil;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
-import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.vocabulary.RDF;
-
 import java.io.FileInputStream;
-import java.util.Iterator;
 import java.util.Properties;
 
 
@@ -29,47 +20,68 @@ public class App {
 
     }
 
-    String schema_directory = "Database/dbpedia_2014";
-    Dataset schema_dataset = TDBFactory.createDataset(schema_directory);
-    Model schema = schema_dataset.getDefaultModel() ;
-    Resource schemaResource = schema.getResource("http://dbpedia.org/ontology/Person");
-    StmtIterator schemaIter = schemaResource.listProperties();
+    String schemaDirectory = "Database/dbpedia_2014";
+    Dataset schemaDataset = TDBFactory.createDataset(schemaDirectory);
+    Model schema = schemaDataset.getDefaultModel() ;
 
-    while (schemaIter.hasNext()) {
-      Statement stmt      = schemaIter.nextStatement();  // get next statement
-      System.out.println(stmt);
+    String typeDirectory = "Database/instance_types_en";
+    Dataset typeDataset = TDBFactory.createDataset(typeDirectory);
+    Model typeData = typeDataset.getDefaultModel();
+
+    String factDirectory = "Database/mappingbased_properties_en";
+    Dataset factDataset = TDBFactory.createDataset(factDirectory);
+    Model factData = factDataset.getDefaultModel();
+
+    //In documentation:
+    // Model add(Model m)
+    // Add all the statements in another model
+
+    //Builds type based model
+    Reasoner typeReasoner = ReasonerRegistry.getRDFSReasoner();
+    typeReasoner = typeReasoner.bindSchema(schema);
+    InfModel typeModel = ModelFactory.createInfModel(typeReasoner, typeData);
+
+    //Builds factual based model
+    Reasoner factReasoner = ReasonerRegistry.getRDFSReasoner();
+    factReasoner = factReasoner.bindSchema(schema);
+    InfModel factModel = ModelFactory.createInfModel(factReasoner, factData);
+
+    //Two resource types needed. Keep note of resource-ontology diff
+    Resource abe = typeModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
+    Resource person = typeModel.getResource("http://dbpedia.org/ontology/Person");
+    Property birthPlace = factModel.getProperty("http://dbpedia.org/ontology/birthPlace");
+    Resource abe_home;
+    Property country = factModel.getProperty("http://dbpedia.org/ontology/country");
+    // If Abraham Lincoln is type Person -> Is Abraham Lincoln a person?
+
+    if (typeModel.contains(abe, RDF.type, person)) {
+      System.out.println("Abraham Lincoln is a person.");
+      if (factModel.contains(abe, birthPlace, (RDFNode) null)){
+        NodeIterator born = factModel.listObjectsOfProperty(abe, birthPlace);
+        System.out.println("Abraham Lincoln has a birthPlace:");
+        if(born.hasNext()){
+          RDFNode abe_birthplace = born.next();
+          abe_home = abe_birthplace.asResource();
+          System.out.println(abe_home.getURI());
+          NodeIterator countryIn = factModel.listObjectsOfProperty(abe_home, country);
+          if(countryIn.hasNext()){
+            RDFNode abeHomeCountry = countryIn.next();
+            Resource abeCountry = abeHomeCountry.asResource();
+            System.out.println("Abraham Lincoln home country:");
+            System.out.println(abeCountry.getURI());
+          }
+        }
+        else{
+          System.out.println("no place.");
+        }
+      }
+
+    }
+    else {
+      System.out.println("Abraham Lincoln was failed to be recognized as a person");
     }
 
-    String type_directory = "Database/instance_types_en";
-    Dataset type_dataset = TDBFactory.createDataset(type_directory);
-    Model typeData = type_dataset.getDefaultModel();
-
-
-
-
-    String fact_directory = "Database/mappingbased_properties_en";
-    Dataset fact_dataset = TDBFactory.createDataset(fact_directory);
-    Model factData = fact_dataset.getDefaultModel();
-    Resource factResources = factData.getResource("http://dbpedia.org/ontology/Person");
-
-//    System.out.print(factData);
-    //Builds type based model
-//    Reasoner typeReasoner = ReasonerRegistry.getRDFSReasoner();
-//    typeReasoner = typeReasoner.bindSchema(schema);
-//    InfModel typeModel = ModelFactory.createInfModel(typeReasoner, typeData);
-
-//    Reasoner factReasoner = ReasonerRegistry.getRDFSReasoner();
-//    factReasoner = factReasoner.bindSchema(schema);
-//    InfModel factModel = ModelFactory.createInfModel(factReasoner, factData);
-//
-//    Resource abe = typeModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
-//    Resource person = typeModel.getResource("http://dbpedia.org/ontology/Person");
-//    Property birthPlace = factModel.getProperty("http://dbpedia.org/ontology/birthPlace");
-
-//    Object bool = null;
-//    Selector personSelector = new SimpleSelector(person, birthPlace, bool);
-//    Model persons = factModel.query(personSelector);
-
+    System.out.println("done");
   }
 
 }
