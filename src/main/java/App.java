@@ -1,15 +1,22 @@
-import org.apache.jena.query.*;
+import org.apache.jena.base.Sys;
+import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.datatypes.xsd.XSDDatatype;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.*;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.tdb.TDBLoader;
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.jena.util.FileManager;
+import org.apache.jena.util.PrintUtil;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
-import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.log4j.PropertyConfigurator;
 
 import java.io.FileInputStream;
+import java.util.Iterator;
 import java.util.Properties;
 
-import static org.apache.jena.enhanced.BuiltinPersonalities.model;
 
 public class App {
 
@@ -22,54 +29,47 @@ public class App {
 
     }
 
-    // String directory = "Database/TestDB";
-    String directory = "Database/DB";
-    System.out.print("DB init \n");
-    Dataset dataset = TDBFactory.createDataset(directory);
-    System.out.print("DB created \n");
-    Model model = dataset.getDefaultModel() ;
-    System.out.print("DB loaded \n");
+    String schema_directory = "Database/dbpedia_2014";
+    Dataset schema_dataset = TDBFactory.createDataset(schema_directory);
+    Model schema = schema_dataset.getDefaultModel() ;
+    Resource schemaResource = schema.getResource("http://dbpedia.org/ontology/Person");
+    StmtIterator schemaIter = schemaResource.listProperties();
 
-    System.out.print("reason \n");
-
-    Reasoner reasoner = ReasonerRegistry.getOWLReasoner();
-    reasoner = reasoner.bindSchema(model);
-
-    System.out.print("get owl \n");
-
-    InfModel infmodel = ModelFactory.createInfModel(reasoner, model);
-
-    System.out.print("info done \n");
-
-    Resource Aris = infmodel.getResource("http://dbpedia.org/ontology/Aristotle");
-    Resource Person = infmodel.getResource("http://dbpedia.org/ontology/Person");
-    if (infmodel.contains(Aris, RDF.type, Person)) {
-      System.out.println("Aristotle is a person.");
-    } else {
-      System.out.println("Aristotle was failed to be recognized as a person");
+    while (schemaIter.hasNext()) {
+      Statement stmt      = schemaIter.nextStatement();  // get next statement
+      System.out.println(stmt);
     }
 
-    System.out.println("done");
+    String type_directory = "Database/instance_types_en";
+    Dataset type_dataset = TDBFactory.createDataset(type_directory);
+    Model typeData = type_dataset.getDefaultModel();
 
-//    StmtIterator iter = model.listStatements();
 
-    // print out the predicate, subject and object of each statement
-//    while (iter.hasNext()) {
-//      Statement stmt      = iter.nextStatement();         // get next statement
-//      Resource  subject   = stmt.getSubject();   // get the subject
-//      Property  predicate = stmt.getPredicate(); // get the predicate
-//      RDFNode   object    = stmt.getObject();    // get the object
+
+
+    String fact_directory = "Database/mappingbased_properties_en";
+    Dataset fact_dataset = TDBFactory.createDataset(fact_directory);
+    Model factData = fact_dataset.getDefaultModel();
+    Resource factResources = factData.getResource("http://dbpedia.org/ontology/Person");
+
+//    System.out.print(factData);
+    //Builds type based model
+//    Reasoner typeReasoner = ReasonerRegistry.getRDFSReasoner();
+//    typeReasoner = typeReasoner.bindSchema(schema);
+//    InfModel typeModel = ModelFactory.createInfModel(typeReasoner, typeData);
+
+//    Reasoner factReasoner = ReasonerRegistry.getRDFSReasoner();
+//    factReasoner = factReasoner.bindSchema(schema);
+//    InfModel factModel = ModelFactory.createInfModel(factReasoner, factData);
 //
-//      System.out.print(subject.toString());
-//      System.out.print(" " + predicate.toString() + " ");
-//      if (object instanceof Resource) {
-//        System.out.print(object.toString());
-//      } else {
-//        // object is a literal
-//        System.out.print(" \"" + object.toString() + "\"");
-//      }
-//      System.out.println(" .");
-//    }
+//    Resource abe = typeModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
+//    Resource person = typeModel.getResource("http://dbpedia.org/ontology/Person");
+//    Property birthPlace = factModel.getProperty("http://dbpedia.org/ontology/birthPlace");
+
+//    Object bool = null;
+//    Selector personSelector = new SimpleSelector(person, birthPlace, bool);
+//    Model persons = factModel.query(personSelector);
+
   }
 
 }
