@@ -59,11 +59,13 @@ public class App {
 
 
     //Two resource types needed. Keep note of resource-ontology diff
+    //Property country = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/country");
+    //Property birthPlace = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/birthPlace");
+
+    /*
     Resource abe = dbpediaInfModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
     Resource person = dbpediaInfModel.getResource("http://dbpedia.org/ontology/Person");
-    Property birthPlace = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/birthPlace");
     Resource abe_home;
-    Property country = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/country");
 
 
     // If Abraham Lincoln is type Person -> Is Abraham Lincoln a person?
@@ -95,23 +97,76 @@ public class App {
     else {
       System.out.println("Abraham Lincoln was failed to be recognized as a person");
     }
+	*/
 
-    //Test inference shortcut
-    System.out.println("iterate:");
+    Property country = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/country");
+    Property birthPlace = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/birthPlace");
+    Property isPartOf = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/isPartOf");
+    Property state = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/state");
+
+   	Resource unitedStates = dbpediaInfModel.getResource("http://dbpedia.org/resource/United_States");
 
     ResIterator peopleWithBirthPlace = dbpediaInfModel.listResourcesWithProperty(birthPlace);
+
+    Resource homeState;
+
     int count = 0;
-    while(count < 30){
-    	try{
-    		System.out.println(peopleWithBirthPlace.nextResource().getURI());
-    	}
-    	catch(Exception e){
-    		break;
-    	}
+    while(count < 100){
+    		Resource currentPerson = peopleWithBirthPlace.nextResource();
+    		homeState = null;
+    		//Look through multiple birth place entries
+    		NodeIterator birthPlaceList = dbpediaInfModel.listObjectsOfProperty(currentPerson, birthPlace);
+    		while (birthPlaceList.hasNext()){
+    			RDFNode currentBirthPlace = birthPlaceList.next();
+    			Resource currentBirthPlaceResource = currentBirthPlace.asResource();
+
+    			//Check if birthplace is within the USA
+    			if(dbpediaInfModel.contains(currentBirthPlaceResource, country, unitedStates)){
+    				System.out.println(currentPerson + " ");
+    				System.out.println(currentBirthPlaceResource.getURI());
+
+    				ResIterator stateBirthPlace = dbpediaInfModel.listResourcesWithProperty(state, currentBirthPlaceResource);
+    				if (stateBirthPlace.hasNext()){
+    					homeState = currentBirthPlaceResource;
+    					System.out.println("STATE! (1)");
+    				}
+    				//else
+    				NodeIterator birthPlacePartOfList = dbpediaInfModel.listObjectsOfProperty(currentBirthPlaceResource, isPartOf);
+    				while(birthPlacePartOfList.hasNext()){
+    					RDFNode currentBirthPlacePartOf = birthPlacePartOfList.next();
+    					Resource currentBirthPlacePartOfResource = currentBirthPlacePartOf.asResource();
+
+    					ResIterator statePartOfBirthPlace = dbpediaInfModel.listResourcesWithProperty(state, currentBirthPlacePartOfResource);
+    					if(statePartOfBirthPlace.hasNext()){
+    						System.out.println(currentBirthPlacePartOfResource.getURI());
+    						homeState = currentBirthPlacePartOfResource;
+    						System.out.println("STATE! (2)");
+    					}
+    				}
+    				//}
+    				if (homeState != null){
+    					System.out.println(homeState.getURI());
+    				}
+					System.out.println();
+				}
+    		}
     	count++;
     }
 
-
+    //goal: for type(Person) get birthplace,
+    //      if birthplace country == United States
+    //			then find birthplace $state
+    //
+    //		find United States area in sq miles
+    //		find $state in sq miles
+    //
+    //		$Person was born in $birthplace.state
+    //		What percent of the United States by area
+    //		is $state if the United States is $US.areaSqMiles
+    //		and $state is $state.areaSqMiles? Round to the
+    //		nearest whole number percentage.
+    //
+    //		Ans = ( $state.areaSqMiles / %US.areaSqMiles ) * 100
 
 
     System.out.println("done");
