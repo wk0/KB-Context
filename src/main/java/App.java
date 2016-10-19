@@ -8,6 +8,8 @@ import org.apache.jena.vocabulary.RDF;
 import java.io.FileInputStream;
 import java.util.Properties;
 
+import java.util.ArrayList;
+
 
 public class App {
 
@@ -99,59 +101,6 @@ public class App {
     }
 	*/
 
-    Property country = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/country");
-    Property birthPlace = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/birthPlace");
-    Property isPartOf = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/isPartOf");
-    Property state = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/state");
-
-   	Resource unitedStates = dbpediaInfModel.getResource("http://dbpedia.org/resource/United_States");
-
-    ResIterator peopleWithBirthPlace = dbpediaInfModel.listResourcesWithProperty(birthPlace);
-
-    Resource homeState;
-
-    int count = 0;
-    while(count < 100){
-    		Resource currentPerson = peopleWithBirthPlace.nextResource();
-    		homeState = null;
-    		//Look through multiple birth place entries
-    		NodeIterator birthPlaceList = dbpediaInfModel.listObjectsOfProperty(currentPerson, birthPlace);
-    		while (birthPlaceList.hasNext()){
-    			RDFNode currentBirthPlace = birthPlaceList.next();
-    			Resource currentBirthPlaceResource = currentBirthPlace.asResource();
-
-    			//Check if birthplace is within the USA
-    			if(dbpediaInfModel.contains(currentBirthPlaceResource, country, unitedStates)){
-    				System.out.println(currentPerson + " ");
-    				System.out.println(currentBirthPlaceResource.getURI());
-
-    				ResIterator stateBirthPlace = dbpediaInfModel.listResourcesWithProperty(state, currentBirthPlaceResource);
-    				if (stateBirthPlace.hasNext()){
-    					homeState = currentBirthPlaceResource;
-    					System.out.println("STATE! (1)");
-    				}
-    				//else
-    				NodeIterator birthPlacePartOfList = dbpediaInfModel.listObjectsOfProperty(currentBirthPlaceResource, isPartOf);
-    				while(birthPlacePartOfList.hasNext()){
-    					RDFNode currentBirthPlacePartOf = birthPlacePartOfList.next();
-    					Resource currentBirthPlacePartOfResource = currentBirthPlacePartOf.asResource();
-
-    					ResIterator statePartOfBirthPlace = dbpediaInfModel.listResourcesWithProperty(state, currentBirthPlacePartOfResource);
-    					if(statePartOfBirthPlace.hasNext()){
-    						System.out.println(currentBirthPlacePartOfResource.getURI());
-    						homeState = currentBirthPlacePartOfResource;
-    						System.out.println("STATE! (2)");
-    					}
-    				}
-    				//}
-    				if (homeState != null){
-    					System.out.println(homeState.getURI());
-    				}
-					System.out.println();
-				}
-    		}
-    	count++;
-    }
 
     //goal: for type(Person) get birthplace,
     //      if birthplace country == United States
@@ -167,11 +116,96 @@ public class App {
     //		nearest whole number percentage.
     //
     //		Ans = ( $state.areaSqMiles / %US.areaSqMiles ) * 100
+    ArrayList<Resource[]> personStateOriginal = getPersonAndHomeStateUSA(dbpediaInfModel, 100);
 
+    for(Resource[] indiv : personStateOriginal){
+    	if(indiv[2] == null){
+    		System.out.println("Person: " + indiv[0].getURI());
+    		System.out.println("State : " + indiv[1].getURI());
+    	}
+    	else if (indiv[2] != null){
+    		System.out.println("Person:  " + indiv[0].getURI());
+    		System.out.println("Location:" + indiv[2].getURI());
+    		System.out.println("State :  " + indiv[1].getURI());
+    	}
+    }
 
     System.out.println("done");
   }
 
+  public static ArrayList<Resource[]> getPersonAndHomeStateUSA(InfModel dbpediaInfModel, int iterations){
+  	ArrayList<Resource[]> result = new ArrayList<Resource[]>();
+
+  	Property country = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/country");
+    Property birthPlace = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/birthPlace");
+    Property isPartOf = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/isPartOf");
+    Property state = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/state");
+
+   	Resource unitedStates = dbpediaInfModel.getResource("http://dbpedia.org/resource/United_States");
+
+   	ResIterator peopleWithBirthPlace = dbpediaInfModel.listResourcesWithProperty(birthPlace);
+
+
+    int count = 0;
+    while(count < iterations){
+    		Resource[] individial = new Resource[3];
+    		boolean intermediate = false;
+    		Resource homeState = null;
+
+    		Resource currentPerson = peopleWithBirthPlace.nextResource();
+
+    		//Look through multiple birth place entries
+    		NodeIterator birthPlaceList = dbpediaInfModel.listObjectsOfProperty(currentPerson, birthPlace);
+    		while (birthPlaceList.hasNext()){
+    			RDFNode currentBirthPlace = birthPlaceList.next();
+    			Resource currentBirthPlaceResource = currentBirthPlace.asResource();
+
+    			//Check if birthplace is within the USA
+    			if(dbpediaInfModel.contains(currentBirthPlaceResource, country, unitedStates)){
+    				//System.out.println(currentPerson + " ");
+    				//System.out.println(currentBirthPlaceResource.getURI());
+
+    				ResIterator stateBirthPlace = dbpediaInfModel.listResourcesWithProperty(state, currentBirthPlaceResource);
+    				if (stateBirthPlace.hasNext()){
+    					homeState = currentBirthPlaceResource;
+    					intermediate = false;
+    					//System.out.println("STATE! (1)");
+    				}
+    				//else
+    				NodeIterator birthPlacePartOfList = dbpediaInfModel.listObjectsOfProperty(currentBirthPlaceResource, isPartOf);
+    				while(birthPlacePartOfList.hasNext()){
+    					RDFNode currentBirthPlacePartOf = birthPlacePartOfList.next();
+    					Resource currentBirthPlacePartOfResource = currentBirthPlacePartOf.asResource();
+
+    					ResIterator statePartOfBirthPlace = dbpediaInfModel.listResourcesWithProperty(state, currentBirthPlacePartOfResource);
+    					if(statePartOfBirthPlace.hasNext()){
+    						//System.out.println(currentBirthPlacePartOfResource.getURI());
+    						homeState = currentBirthPlacePartOfResource;
+    						intermediate = true;
+    						//System.out.println("STATE! (2)");
+    					}
+    				}
+    				//}
+    				if (homeState != null){
+    					individual[0] = currentPerson;
+    					individial[1] = homeState;
+    					if(intermediate){
+    						individial[3] = currentBirthPlaceResource;
+    					}
+    					else{
+    						individial[3] = null;
+    					}
+
+    					result.add(individial);
+    				}
+					//System.out.println();
+				}
+    		}
+    	count++;
+    }
+    return result;
+
+  }
 
   /*
   public static void validateModel(InfModel m){
