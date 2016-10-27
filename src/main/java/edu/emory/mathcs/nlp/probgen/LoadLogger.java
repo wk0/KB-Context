@@ -10,7 +10,7 @@ import java.util.Properties;
  */
 public class LoadLogger {
     public static void loadLogger() {
-        final String log4jFile = "src/main/resources/edu/emory/mathcs/nlp/probgen/log4j.properties";
+        final String log4jFile = "/src/main/resources/edu/emory/mathcs/nlp/probgen/log4j.properties";
         try {
             System.out.println("log4j loaded successfully");
             Properties props = new Properties();
