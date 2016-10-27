@@ -1,17 +1,10 @@
 package edu.emory.mathcs.nlp.probgen;
 
-import edu.emory.mathcs.nlp.probgen.*;
-
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.tdb.TDBFactory;
-import org.apache.log4j.PropertyConfigurator;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
-import org.apache.jena.vocabulary.RDF;
-
-import java.io.FileInputStream;
-import java.util.Properties;
 
 import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.datatypes.RDFDatatype;
@@ -29,8 +22,10 @@ public class App {
     public static void main(String[] args) {
         System.out.println("Starting!");
 
+        LoadLogger logger = new LoadLogger();
+        logger.loadLogger();
 
-        loadLogger();
+        Num num = new Num();
 
         //Validate the model -- not needed right now
         /*
@@ -136,18 +131,6 @@ public class App {
         }
         return 0.0;
     }
-
-
-    public static void loadLogger() {
-        try {
-            Properties props = new Properties();
-            props.load(new FileInputStream("log4j.properties"));
-            PropertyConfigurator.configure(props);
-        } catch (Exception e) {
-            //System.out.println("Error loading log4j");
-        }
-    }
-
 
     public static double getUsaArea(String code, String sqWhat) {
         Resource usaResource = dbpediaInfModel.getResource("http://dbpedia.org/resource/United_States");
