@@ -5,14 +5,10 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.reasoner.Reasoner;
 import org.apache.jena.reasoner.ReasonerRegistry;
-
-import org.apache.jena.reasoner.ValidityReport;
 import org.apache.jena.datatypes.RDFDatatype;
 
 import java.text.DecimalFormat;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 
 
 public class App {
@@ -350,21 +346,6 @@ public class App {
             return true;
         } else {
             return false;
-        }
-    }
-
-
-    public static void validateModel(InfModel m) {
-        ValidityReport validity = m.validate();
-        if (validity.isValid()) {
-            System.out.println("OK, valid.");
-            return;
-        } else {
-            System.out.println("Conflicts");
-            for (Iterator i = validity.getReports(); i.hasNext(); ) {
-                System.out.println(" - " + i.next());
-            }
-            return;
         }
     }
 
