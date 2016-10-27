@@ -1,3 +1,5 @@
+package edu.emory.mathcs.nlp.probgen;
+
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.tdb.TDBFactory;
