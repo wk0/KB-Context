@@ -1,19 +1,14 @@
 package edu.emory.mathcs.nlp.probgen;
 
-import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.*;
-import org.apache.jena.tdb.TDBFactory;
-import org.apache.jena.reasoner.Reasoner;
-import org.apache.jena.reasoner.ReasonerRegistry;
 import org.apache.jena.datatypes.RDFDatatype;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import static edu.emory.mathcs.nlp.probgen.InferenceModel.dbpediaInfModel;
 
 public class App {
-
-    static InfModel dbpediaInfModel;
 
     public static void main(String[] args) {
         System.out.println("Starting!");
@@ -22,6 +17,9 @@ public class App {
         logger.loadLogger();
 
         Num num = new Num();
+
+        InferenceModel inf = new InferenceModel();
+        inf.makeInferenceModel();
 
         //Validate the model -- not needed right now
         /*
@@ -45,7 +43,6 @@ public class App {
         //
         //      Ans = ( $state.areaSqMiles / %US.areaSqMiles ) * 100
 
-        makeInferenceModel();
 
         // 0. Person
         // 1. State
@@ -65,17 +62,13 @@ public class App {
             printPSONoLoop(r);
             System.out.println("State Area:    " + stateArea + " " + units + " (" + precision + ")");
             System.out.println();
-
         }
-
-
     }
 
     public static double getStateArea(String code, String sqWhat, Resource state) {
         //STILL UNDER CONSTRUCTION
         Property areaTotalProp = dbpediaInfModel.getProperty("http://dbpedia.org/ontology/PopulatedPlace/areaTotal");
         NodeIterator stateProps = dbpediaInfModel.listObjectsOfProperty(state, areaTotalProp);
-
 
         double preciseArea = 0.0;
         double roundedArea = 0.0;
@@ -179,33 +172,6 @@ public class App {
         return 0.0;
     }
 
-    public static void makeInferenceModel() {
-        String schemaDirectory = "Database/dbpedia_2014";
-        Dataset schemaDataset = TDBFactory.createDataset(schemaDirectory);
-        Model dbpediaSchema = schemaDataset.getDefaultModel();
-
-        String typeDirectory = "Database/instance_types_en";
-        Dataset typeDataset = TDBFactory.createDataset(typeDirectory);
-        Model typeData = typeDataset.getDefaultModel();
-
-        String factDirectory = "Database/mappingbased_properties_en";
-        Dataset factDataset = TDBFactory.createDataset(factDirectory);
-        Model factData = factDataset.getDefaultModel();
-
-        String numDirectory = "Database/specific_mappingbased_properties_en";
-        Dataset numDataset = TDBFactory.createDataset(numDirectory);
-        Model numData = numDataset.getDefaultModel();
-
-
-        //combine models
-        Model combinedDataModel = ModelFactory.createUnion(factData, numData);
-        Model dbpediaBaseModel = ModelFactory.createUnion(combinedDataModel, typeData);
-
-        //Build combined inference model
-        Reasoner dbpediaReasoner = ReasonerRegistry.getRDFSReasoner();
-        dbpediaReasoner = dbpediaReasoner.bindSchema(dbpediaSchema);
-        dbpediaInfModel = ModelFactory.createInfModel(dbpediaReasoner, dbpediaBaseModel);
-    }
 
     public static void printPSONoLoop(Resource[] indiv) {
         if (indiv[2] == null) {
