@@ -7,19 +7,26 @@ import java.util.regex.Pattern;
 
 public class Num {
 
-    private Statement stmt;
+    private Statement statement;
     private StmtIterator iter;
     private RDFNode object;
+    private Resource resource;
 
     public Num () { }
 
-    public Num (Statement stmt) {
-        this.stmt = stmt;
-        this.object = this.stmt.getObject();
+    public Num (Statement statement) {
+        this.statement = statement;
+        this.object = this.statement.getObject();
     }
 
     public Num (StmtIterator iter) {
         this.iter = iter;
+    }
+
+    public Num (Resource resource, Property property) {
+        this.resource = resource;
+        this.resource.getProperty(property);
+        this.object = this.resource;
     }
 
     public float getNum() {
@@ -41,8 +48,8 @@ public class Num {
     public float getSumOfStatementList() {
         float sum = 0;
         while (this.iter.hasNext()) {
-            Statement stmt = this.iter.nextStatement();
-            Num nm  = new Num(stmt);
+            Statement statement = this.iter.nextStatement();
+            Num nm  = new Num(statement);
             sum = sum + nm.getNum();
         }
         return sum;
