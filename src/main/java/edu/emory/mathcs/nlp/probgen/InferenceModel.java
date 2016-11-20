@@ -14,6 +14,7 @@ import org.apache.jena.tdb.TDBFactory;
 public class InferenceModel {
 
     static InfModel dbpediaInfModel;
+    static Model typeData;
 
     public static void makeInferenceModel() {
         String schemaDirectory = "Database/dbpedia_2014";
@@ -22,7 +23,7 @@ public class InferenceModel {
 
         String typeDirectory = "Database/instance_types_en";
         Dataset typeDataset = TDBFactory.createDataset(typeDirectory);
-        Model typeData = typeDataset.getDefaultModel();
+        typeData = typeDataset.getDefaultModel();
 
         String factDirectory = "Database/mappingbased_properties_en";
         Dataset factDataset = TDBFactory.createDataset(factDirectory);
@@ -31,7 +32,6 @@ public class InferenceModel {
         String numDirectory = "Database/specific_mappingbased_properties_en";
         Dataset numDataset = TDBFactory.createDataset(numDirectory);
         Model numData = numDataset.getDefaultModel();
-
 
         //combine models
         Model combinedDataModel = ModelFactory.createUnion(factData, numData);
