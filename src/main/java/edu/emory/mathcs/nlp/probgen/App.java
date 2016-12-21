@@ -5,7 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static edu.emory.mathcs.nlp.probgen.InferenceModel.dbpediaInfModel;
-import static edu.emory.mathcs.nlp.probgen.InferenceModel.typeData;
 
 public class App {
 
@@ -17,9 +16,9 @@ public class App {
         InferenceModel inf = new InferenceModel();
         inf.makeInferenceModel();
 
-        Resource usa = dbpediaInfModel.getResource("http://dbpedia.org/resource/M1917_Enfield");
+        Resource resource = dbpediaInfModel.getResource("http://dbpedia.org/resource/M1917_Enfield");
 
-        StmtIterator iter = usa.listProperties();
+        StmtIterator iter = resource.listProperties();
 
         while (iter.hasNext()){
             Statement statement = iter.nextStatement();
@@ -27,21 +26,27 @@ public class App {
             Property  predicate = statement.getPredicate();   // get the predicate
             RDFNode   object    = statement.getObject();      // get the object
 
-            String type = "#type";
-            Pattern typePattern = Pattern.compile(type);
-            Matcher typeMatcher = typePattern.matcher(predicate.toString());
-
-            String dbo = "dbpedia.org/ontology";
-            Pattern dboPattern = Pattern.compile(dbo);
-            Matcher dboMatcher = dboPattern.matcher(object.toString());
-
-            if (typeMatcher.find() && dboMatcher.find() && object instanceof Resource) {
-                System.out.println("Subject: " + subject.toString());
-                System.out.println("Predicate: " + predicate.toString());
+            if (checkType(predicate) && checkDBO(object) && object instanceof Resource) {
+                System.out.println("Subject type");
                 System.out.println("Object:" + object.toString());
             } else {
 
             }
         }
+
+    }
+
+    public static boolean checkType(Property predicate) {
+        String type = "#type";
+        Pattern typePattern = Pattern.compile(type);
+        Matcher typeMatcher = typePattern.matcher(predicate.toString());
+        return typeMatcher.find();
+    }
+
+    public static boolean checkDBO(RDFNode object) {
+        String dbo = "dbpedia.org/ontology";
+        Pattern dboPattern = Pattern.compile(dbo);
+        Matcher dboMatcher = dboPattern.matcher(object.toString());
+        return dboMatcher.find();
     }
 }
