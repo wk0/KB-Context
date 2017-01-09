@@ -16,7 +16,7 @@
                 <version>1.5.0</version>
                 <configuration>
                     <!--Edit mainClass for target Java class-->
-                    <mainClass>Num</mainClass>
+                    <mainClass>edu.emory.mathcs.nlp.probgen.App</mainClass>
                 </configuration>
             </plugin>
         </plugins>

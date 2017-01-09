@@ -1,0 +1,56 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] Using the MultiThreadedBuilder implementation with a thread count of 48
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building jena-maven-example 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ jena-maven-example ---
+[INFO] Deleting /home/wkelly3/jena-projects/jena-maven-example/target
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ jena-maven-example ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.2:compile (default-compile) @ jena-maven-example ---
+[INFO] Changes detected - recompiling the module!
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 5 source files to /home/wkelly3/jena-projects/jena-maven-example/target/classes
+[INFO] /home/wkelly3/jena-projects/jena-maven-example/src/main/java/edu/emory/mathcs/nlp/probgen/App.java: /home/wkelly3/jena-projects/jena-maven-example/src/main/java/edu/emory/mathcs/nlp/probgen/App.java uses unchecked or unsafe operations.
+[INFO] /home/wkelly3/jena-projects/jena-maven-example/src/main/java/edu/emory/mathcs/nlp/probgen/App.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ jena-maven-example ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] skip non existing resourceDirectory /home/wkelly3/jena-projects/jena-maven-example/src/test/resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.2:testCompile (default-testCompile) @ jena-maven-example ---
+[INFO] Changes detected - recompiling the module!
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 1 source file to /home/wkelly3/jena-projects/jena-maven-example/target/test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.17:test (default-test) @ jena-maven-example ---
+[INFO] Surefire report directory: /home/wkelly3/jena-projects/jena-maven-example/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+
+Results :
+
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ jena-maven-example ---
+[INFO] Building jar: /home/wkelly3/jena-projects/jena-maven-example/target/jena-maven-example-1.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-install-plugin:2.5.2:install (default-install) @ jena-maven-example ---
+[INFO] Installing /home/wkelly3/jena-projects/jena-maven-example/target/jena-maven-example-1.0-SNAPSHOT.jar to /home/wkelly3/.m2/repository/edu/emory/mathcs/nlp/jena-maven-example/1.0-SNAPSHOT/jena-maven-example-1.0-SNAPSHOT.jar
+[INFO] Installing /home/wkelly3/jena-projects/jena-maven-example/pom.xml to /home/wkelly3/.m2/repository/edu/emory/mathcs/nlp/jena-maven-example/1.0-SNAPSHOT/jena-maven-example-1.0-SNAPSHOT.pom
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 4.902 s (Wall Clock)
+[INFO] Finished at: 2017-01-09T14:20:51-05:00
+[INFO] Final Memory: 42M/1979M
+[INFO] ------------------------------------------------------------------------

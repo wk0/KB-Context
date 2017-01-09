@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Running Jena Program"
+export MAVEN_OPTS="-Xmx3000000m -XX:+UseConcMarkSweepGC"
+
+mvn -T48 clean install > installlog.txt
+
+if grep 'FAILURE' installlog.txt; then
+   echo "Install Failed"
+   cat installlog.txt
+   exit 1
+fi
+
+mvn -DskipTests=true exec:java

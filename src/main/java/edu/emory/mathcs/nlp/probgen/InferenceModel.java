@@ -17,19 +17,19 @@ public class InferenceModel {
     static Model typeData;
 
     public static void makeInferenceModel() {
-        String schemaDirectory = "Database/dbpedia_2014";
+        String schemaDirectory = "../Database/dbpedia_2014";
         Dataset schemaDataset = TDBFactory.createDataset(schemaDirectory);
         Model dbpediaSchema = schemaDataset.getDefaultModel();
 
-        String typeDirectory = "Database/instance_types_en";
+        String typeDirectory = "../Database/instance_types_en";
         Dataset typeDataset = TDBFactory.createDataset(typeDirectory);
         typeData = typeDataset.getDefaultModel();
 
-        String factDirectory = "Database/mappingbased_properties_en";
+        String factDirectory = "../Database/mappingbased_properties_en";
         Dataset factDataset = TDBFactory.createDataset(factDirectory);
         Model factData = factDataset.getDefaultModel();
 
-        String numDirectory = "Database/specific_mappingbased_properties_en";
+        String numDirectory = "../Database/specific_mappingbased_properties_en";
         Dataset numDataset = TDBFactory.createDataset(numDirectory);
         Model numData = numDataset.getDefaultModel();
 
