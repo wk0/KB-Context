@@ -22,43 +22,55 @@ public class App {
         inf.makeInferenceModel();
 
 
-        Resource resource = dbpediaInfModel.getResource("http://dbpedia.org/resource/Barack_Obama");
+        Resource obamaResource = dbpediaInfModel.getResource("http://dbpedia.org/resource/Barack_Obama");
+        Resource abeResource   = dbpediaInfModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
+
+        ResourceObject obama = new ResourceObject(obamaResource);
+
+        obama.printResourceTypeList();
+        System.out.println();
+        obama.printPropertyList();
 
 
 
-        System.out.println(resource.toString() + " types:");
-        List<Resource> resourceTypeList = getResourceTypeList(resource);
-        for(Resource r : resourceTypeList){
+    }
+}
+
+class ResourceObject{
+	Resource resource;
+	ArrayList<Resource> typeList;
+	ArrayList<Property> propertyList;
+
+
+	public ResourceObject(Resource r){
+		this.resource = r;
+		this.typeList = getResourceTypeList(r);
+		this.propertyList = getResourcePropertyList(r);
+	}
+
+	public ArrayList<Resource> getResourceTypeList(){
+		return typeList;
+	}
+	public ArrayList<Property> getPropertyList(){
+		return propertyList;
+	}
+	public void printResourceTypeList(){
+		System.out.println(resource.toString() + " types:");
+		for(Resource r : typeList){
         	System.out.println("	" + r);
         }
-
-        System.out.println();
-
-        System.out.println(resource.toString() + " properties:");
-        List<Property> propertyList = getResourcePropertyList(resource);
+	}
+	public void printPropertyList(){
+		System.out.println(resource.toString() + " properties:");
         for (Property p: propertyList) {
             System.out.println("	" + p);
         }
 
-    }
+	}
 
-    static ArrayList getResourcePropertyList(Resource r) {
-        ArrayList<Property> propertyArray = new ArrayList<Property>();
-        StmtIterator oIter = r.listProperties();
-        while (oIter.hasNext()){
-            Statement statement = oIter.nextStatement();
-            Property  predicate = statement.getPredicate();     // get the predicate
 
-            if (checkDBO(predicate.toString())) {
-                propertyArray.add(predicate);
-            }
-        }
-        ArrayList<Property> propertyArrayND = removeDuplicateProperties(propertyArray);
-
-        return propertyArrayND;
-    }
-
-    static ArrayList getResourceTypeList(Resource r) {
+	// Resources
+	private ArrayList getResourceTypeList(Resource r) {
         ArrayList<Resource> resourceArray = new ArrayList<Resource>();
         StmtIterator rIter = r.listProperties();
         while (rIter.hasNext()){
@@ -78,7 +90,7 @@ public class App {
         return resourceArrayND;
     }
 
-    static ArrayList removeDuplicateResources(ArrayList<Resource> resourceList){
+    private ArrayList removeDuplicateResources(ArrayList<Resource> resourceList){
     	Set<Resource> hs = new LinkedHashSet<Resource>();
     	hs.addAll(resourceList);
     	resourceList.clear();
@@ -86,7 +98,24 @@ public class App {
     	return resourceList;
     }
 
-    static ArrayList removeDuplicateProperties(ArrayList<Property> propertyList){
+    // Properties
+    private ArrayList getResourcePropertyList(Resource r) {
+        ArrayList<Property> propertyArray = new ArrayList<Property>();
+        StmtIterator oIter = r.listProperties();
+        while (oIter.hasNext()){
+            Statement statement = oIter.nextStatement();
+            Property  predicate = statement.getPredicate();     // get the predicate
+
+            if (checkDBO(predicate.toString())) {
+                propertyArray.add(predicate);
+            }
+        }
+        ArrayList<Property> propertyArrayND = removeDuplicateProperties(propertyArray);
+
+        return propertyArrayND;
+    }
+
+    private ArrayList removeDuplicateProperties(ArrayList<Property> propertyList){
     	Set<Property> hs = new LinkedHashSet<Property>();
     	hs.addAll(propertyList);
     	propertyList.clear();
@@ -94,6 +123,7 @@ public class App {
     	return propertyList;
     }
 
+    // Checkers
     public static boolean checkType(String predicate) {
         String type = "#type";
         Pattern typePattern = Pattern.compile(type);
