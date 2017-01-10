@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.Random;
 
 import static edu.emory.mathcs.nlp.probgen.InferenceModel.dbpediaInfModel;
 
@@ -26,11 +27,16 @@ public class App {
         Resource abeResource   = dbpediaInfModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
 
         ResourceObject obama = new ResourceObject(obamaResource);
+        ResourceObject abe   = new ResourceObject(abeResource);
 
-        obama.printResourceTypeList();
-        System.out.println();
-        obama.printPropertyList();
+        obama.printBoth();
+        abe.printBoth();
 
+        System.out.println("Random Obama Property: "+obama.getRandomProperty().toString());
+        System.out.println("Random Obama Resource: "+obama.getRandomTypeResource().toString());
+
+        System.out.println("Random Abe Property: "+abe.getRandomProperty().toString());
+        System.out.println("Random Abe Resource: "+abe.getRandomTypeResource().toString());
 
 
     }
@@ -40,7 +46,6 @@ class ResourceObject{
 	Resource resource;
 	ArrayList<Resource> typeList;
 	ArrayList<Property> propertyList;
-
 
 	public ResourceObject(Resource r){
 		this.resource = r;
@@ -54,6 +59,16 @@ class ResourceObject{
 	public ArrayList<Property> getPropertyList(){
 		return propertyList;
 	}
+	public Resource getRandomTypeResource(){
+		Resource randomTypeResource = typeList.get(new Random().nextInt(typeList.size()));
+		return randomTypeResource;
+	}
+	public Property getRandomProperty(){
+		Property randomProperty = propertyList.get(new Random().nextInt(propertyList.size()));
+		return randomProperty;
+	}
+
+
 	public void printResourceTypeList(){
 		System.out.println(resource.toString() + " types:");
 		for(Resource r : typeList){
@@ -65,7 +80,13 @@ class ResourceObject{
         for (Property p: propertyList) {
             System.out.println("	" + p);
         }
-
+	}
+	public void printBoth(){
+		printResourceTypeList();
+		System.out.println();
+		printPropertyList();
+		System.out.println();
+		System.out.println();
 	}
 
 
