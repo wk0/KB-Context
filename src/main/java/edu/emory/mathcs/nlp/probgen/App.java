@@ -24,13 +24,46 @@ public class App {
 
 
         Resource obamaResource = dbpediaInfModel.getResource("http://dbpedia.org/resource/Barack_Obama");
+
+
+        getIncoming(obamaResource);
+        getOutgoing(obamaResource);
+
+
+
+
+
+    }
+
+    public static void getIncoming(Resource resourceIn){
+    	// incoming
+        Resource s = null;
+        Property p = null;
+        StmtIterator oi = dbpediaInfModel.listStatements(s, p, resourceIn);
+
+        System.out.println("subject, predicate, " + resourceIn);
+        int inConnectionCount = 0;
+        while(oi.hasNext()){
+        	Statement statement = oi.nextStatement();
+        	Resource  subject   = statement.getSubject();
+            Property  predicate = statement.getPredicate();
+
+
+            if(checkProperty(predicate.toString()) && checkResource(subject.toString())) {
+            	System.out.println("	" + subject.toString() + ", " + predicate.toString());
+            	inConnectionCount++;
+            }
+        }
+        System.out.println(inConnectionCount + " incoming connections from another resource");
+    	return;
+    }
+    public static void getOutgoing(Resource resourceIn){
+    	// outgoing
         Property p = null;
         RDFNode r = null;
+        StmtIterator oo = dbpediaInfModel.listStatements(resourceIn, p, r);
 
-        // outgoing
-        StmtIterator oo = dbpediaInfModel.listStatements(obamaResource, p, r);
-
-        System.out.println(obamaResource.toString() + ", predicate, object");
+        System.out.println(resourceIn.toString() + ", predicate, object");
         int outConnectionCount = 0;
         while (oo.hasNext()){
             Statement statement = oo.nextStatement();
@@ -43,29 +76,10 @@ public class App {
             }
         }
         System.out.println(outConnectionCount + " outgoing connections to another resource");
-
-
-        // incoming
-        Resource s = null;
-        StmtIterator oi = dbpediaInfModel.listStatements(s, p, obamaResource);
-
-        System.out.println("subject, predicate, " + obamaResource);
-        int inConnectionCount = 0;
-        while(oi.hasNext()){
-        	Statement statement = oi.nextStatement();
-        	Resource  subject   = statement.getSubject();
-            Property  predicate = statement.getPredicate();
-
-
-            if(checkProperty(predicate.toString()) && checkResource(subject.toString())) {
-            	System.out.println("	" + subject.toString() + ", " + predicate.toString());
-            	outConnectionCount++;
-            }
-        }
-        System.out.println(outConnectionCount + " incoming connections from another resource");
-
-
+        return;
     }
+
+
 
     // Checkers
     public static boolean checkResource(String object) {
@@ -81,6 +95,39 @@ public class App {
         Matcher dboMatcher = dboPattern.matcher(object);
         return dboMatcher.find();
     }
+}
+
+class PredicateObjectPair{
+	Property predicate;
+	Resource object;
+	public PredicateObjectPair(Property p, Resource r){
+		this.predicate = p;
+		this.object = r;
+	}
+
+	public Property getPredicate(){
+		return predicate;
+	}
+	public Resource getObject(){
+		return object;
+	}
+}
+
+class SubjectPredicatePair{
+	Resource subject;
+	Property predicate;
+
+	public SubjectPredicatePair(Resource r, Property p){
+		this.subject = r;
+		this.predicate = p;
+	}
+
+	public Resource getSubject(){
+		return subject;
+	}
+	public Property getPredicate(){
+		return predicate;
+	}
 }
 
 class RandomWalk{
