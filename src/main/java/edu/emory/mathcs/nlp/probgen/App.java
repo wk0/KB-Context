@@ -28,13 +28,22 @@ public class App {
 
         //ArrayList<SubjectPredicatePair> inc = getIncoming(obamaResource);
         //ArrayList<PredicateObjectPair>  out = getOutgoing(obamaResource);
+
+
         System.out.println();
+
         System.out.println(obamaResource);
         InOut obama = new InOut(obamaResource);
+	    System.out.println("	incoming: " + obama.getSizeIncoming());
+        System.out.println("	outgoing: " + obama.getSizeOutgoing());
+
+
         System.out.println();
+
         System.out.println(abeResource);
         InOut abe = new InOut(abeResource);
-
+        System.out.println("	incoming: " + abe.getSizeIncoming());
+        System.out.println("	outgoing: " + abe.getSizeOutgoing());
 
     }
 }
@@ -43,6 +52,9 @@ class InOut{
 	Resource core;
 	ArrayList<SubjectPredicatePair> incoming;
 	ArrayList<PredicateObjectPair> outgoing;
+
+	int incomingLength;
+	int outgoingLength;
 
 	public InOut(Resource r){
 		this.core = r;
@@ -55,8 +67,17 @@ class InOut{
 
 		this.incoming = inc;
 		this.outgoing = out;
+
+		this.incomingLength = incoming.size();
+		this.outgoingLength = outgoing.size();
 	}
 
+	public int getSizeIncoming(){
+		return incomingLength;
+	}
+	public int getSizeOutgoing(){
+		return outgoingLength;
+	}
 
 	public ArrayList<SubjectPredicatePair> getIncoming(Resource resourceIn){
     	// incoming
@@ -66,8 +87,6 @@ class InOut{
 
         ArrayList<SubjectPredicatePair> result = new ArrayList<SubjectPredicatePair>();
 
-        //System.out.println("subject, predicate, " + resourceIn);
-        int inConnectionCount = 0;
         while(oi.hasNext()){
         	Statement statement = oi.nextStatement();
         	Resource  subject   = statement.getSubject();
@@ -75,14 +94,10 @@ class InOut{
 
 
             if(checkProperty(predicate.toString()) && checkResource(subject.toString())) {
-            	//System.out.println("	" + subject.toString() + ", " + predicate.toString());
             	SubjectPredicatePair pair = new SubjectPredicatePair(subject, predicate);
             	result.add(pair);
-
-            	inConnectionCount++;
             }
         }
-        System.out.println("	" + inConnectionCount + " incoming connections from another resource");
     	return result;
     }
 
@@ -95,22 +110,16 @@ class InOut{
 
         ArrayList<PredicateObjectPair> result = new ArrayList<PredicateObjectPair>();
 
-        //System.out.println(resourceIn.toString() + ", predicate, object");
-        int outConnectionCount = 0;
         while (oo.hasNext()){
             Statement statement = oo.nextStatement();
             Property  predicate = statement.getPredicate();
             RDFNode   object    = statement.getObject();
 
             if(checkProperty(predicate.toString()) && checkResource(object.toString())) {
-            	//System.out.println("	" + predicate.toString() + ", " + object.toString());
             	PredicateObjectPair pair = new PredicateObjectPair(predicate, object.asResource());
             	result.add(pair);
-
-            	outConnectionCount++;
             }
         }
-        System.out.println("	" + outConnectionCount + " outgoing connections to another resource");
         return result;
     }
 
@@ -127,8 +136,6 @@ class InOut{
         Matcher dboMatcher = dboPattern.matcher(object);
         return dboMatcher.find();
     }
-
-
 }
 
 
