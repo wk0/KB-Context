@@ -24,24 +24,49 @@ public class App {
 
 
         Resource obamaResource = dbpediaInfModel.getResource("http://dbpedia.org/resource/Barack_Obama");
+        Resource abeResource = dbpediaInfModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
 
-
-        getIncoming(obamaResource);
-        getOutgoing(obamaResource);
-
-
-
+        //ArrayList<SubjectPredicatePair> inc = getIncoming(obamaResource);
+        //ArrayList<PredicateObjectPair>  out = getOutgoing(obamaResource);
+        System.out.println();
+        System.out.println(obamaResource);
+        InOut obama = new InOut(obamaResource);
+        System.out.println();
+        System.out.println(abeResource);
+        InOut abe = new InOut(abeResource);
 
 
     }
+}
 
-    public static void getIncoming(Resource resourceIn){
+class InOut{
+	Resource core;
+	ArrayList<SubjectPredicatePair> incoming;
+	ArrayList<PredicateObjectPair> outgoing;
+
+	public InOut(Resource r){
+		this.core = r;
+
+		ArrayList<SubjectPredicatePair> inc = new ArrayList<SubjectPredicatePair>();
+		ArrayList<PredicateObjectPair> out = new ArrayList<PredicateObjectPair>();
+
+		inc = getIncoming(core);
+		out = getOutgoing(core);
+
+		this.incoming = inc;
+		this.outgoing = out;
+	}
+
+
+	public ArrayList<SubjectPredicatePair> getIncoming(Resource resourceIn){
     	// incoming
         Resource s = null;
         Property p = null;
         StmtIterator oi = dbpediaInfModel.listStatements(s, p, resourceIn);
 
-        System.out.println("subject, predicate, " + resourceIn);
+        ArrayList<SubjectPredicatePair> result = new ArrayList<SubjectPredicatePair>();
+
+        //System.out.println("subject, predicate, " + resourceIn);
         int inConnectionCount = 0;
         while(oi.hasNext()){
         	Statement statement = oi.nextStatement();
@@ -50,20 +75,27 @@ public class App {
 
 
             if(checkProperty(predicate.toString()) && checkResource(subject.toString())) {
-            	System.out.println("	" + subject.toString() + ", " + predicate.toString());
+            	//System.out.println("	" + subject.toString() + ", " + predicate.toString());
+            	SubjectPredicatePair pair = new SubjectPredicatePair(subject, predicate);
+            	result.add(pair);
+
             	inConnectionCount++;
             }
         }
-        System.out.println(inConnectionCount + " incoming connections from another resource");
-    	return;
+        System.out.println("	" + inConnectionCount + " incoming connections from another resource");
+    	return result;
     }
-    public static void getOutgoing(Resource resourceIn){
+
+
+	public ArrayList<PredicateObjectPair> getOutgoing(Resource resourceIn){
     	// outgoing
         Property p = null;
         RDFNode r = null;
         StmtIterator oo = dbpediaInfModel.listStatements(resourceIn, p, r);
 
-        System.out.println(resourceIn.toString() + ", predicate, object");
+        ArrayList<PredicateObjectPair> result = new ArrayList<PredicateObjectPair>();
+
+        //System.out.println(resourceIn.toString() + ", predicate, object");
         int outConnectionCount = 0;
         while (oo.hasNext()){
             Statement statement = oo.nextStatement();
@@ -71,31 +103,36 @@ public class App {
             RDFNode   object    = statement.getObject();
 
             if(checkProperty(predicate.toString()) && checkResource(object.toString())) {
-            	System.out.println("	" + predicate.toString() + ", " + object.toString());
+            	//System.out.println("	" + predicate.toString() + ", " + object.toString());
+            	PredicateObjectPair pair = new PredicateObjectPair(predicate, object.asResource());
+            	result.add(pair);
+
             	outConnectionCount++;
             }
         }
-        System.out.println(outConnectionCount + " outgoing connections to another resource");
-        return;
+        System.out.println("	" + outConnectionCount + " outgoing connections to another resource");
+        return result;
     }
 
-
-
-    // Checkers
-    public static boolean checkResource(String object) {
+    public boolean checkResource(String object) {
         String dbo = "dbpedia.org/resource";
         Pattern dboPattern = Pattern.compile(dbo);
         Matcher dboMatcher = dboPattern.matcher(object);
         return dboMatcher.find();
     }
 
-    public static boolean checkProperty(String object) {
+    public boolean checkProperty(String object) {
         String dbo = "dbpedia.org/ontology";
         Pattern dboPattern = Pattern.compile(dbo);
         Matcher dboMatcher = dboPattern.matcher(object);
         return dboMatcher.find();
     }
+
+
 }
+
+
+
 
 class PredicateObjectPair{
 	Property predicate;
