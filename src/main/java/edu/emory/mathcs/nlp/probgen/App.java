@@ -24,29 +24,62 @@ public class App {
 
 
         Resource obamaResource = dbpediaInfModel.getResource("http://dbpedia.org/resource/Barack_Obama");
-        Resource abeResource   = dbpediaInfModel.getResource("http://dbpedia.org/resource/Abraham_Lincoln");
+        Property p = null;
+        RDFNode r = null;
 
-        ResourceObject obama = new ResourceObject(obamaResource);
-        ResourceObject abe   = new ResourceObject(abeResource);
+        // outgoing
+        StmtIterator oo = dbpediaInfModel.listStatements(obamaResource, p, r);
 
-        /*
-        obama.printBoth();
-        abe.printBoth();
+        System.out.println(obamaResource.toString() + ", predicate, object");
+        int outConnectionCount = 0;
+        while (oo.hasNext()){
+            Statement statement = oo.nextStatement();
+            Property  predicate = statement.getPredicate();
+            RDFNode   object    = statement.getObject();
 
-        System.out.println("Random Obama Property: "+obama.getRandomProperty().toString());
-        System.out.println("Random Obama Resource: "+obama.getRandomTypeResource().toString());
-
-        System.out.println("Random Abe Property: "+abe.getRandomProperty().toString());
-        System.out.println("Random Abe Resource: "+abe.getRandomTypeResource().toString());
-		*/
-
-		RandomWalk r = new RandomWalk(obama);
-		int numberOfSteps = 10;
-		for(int i = 0; i < numberOfSteps; i++){
-			r.takeStep();
-		}
+            if(checkProperty(predicate.toString()) && checkResource(object.toString())) {
+            	System.out.println("	" + predicate.toString() + ", " + object.toString());
+            	outConnectionCount++;
+            }
+        }
+        System.out.println(outConnectionCount + " outgoing connections to another resource");
 
 
+        // incoming
+        Resource s = null;
+        StmtIterator oi = dbpediaInfModel.listStatements(s, p, obamaResource);
+
+        System.out.println("subject, predicate, " + obamaResource);
+        int inConnectionCount = 0;
+        while(oi.hasNext()){
+        	Statement statement = oi.nextStatement();
+        	Resource  subject   = statement.getSubject();
+            Property  predicate = statement.getPredicate();
+
+
+            if(checkProperty(predicate.toString()) && checkResource(subject.toString())) {
+            	System.out.println("	" + subject.toString() + ", " + predicate.toString());
+            	outConnectionCount++;
+            }
+        }
+        System.out.println(outConnectionCount + " incoming connections from another resource");
+
+
+    }
+
+    // Checkers
+    public static boolean checkResource(String object) {
+        String dbo = "dbpedia.org/resource";
+        Pattern dboPattern = Pattern.compile(dbo);
+        Matcher dboMatcher = dboPattern.matcher(object);
+        return dboMatcher.find();
+    }
+
+    public static boolean checkProperty(String object) {
+        String dbo = "dbpedia.org/ontology";
+        Pattern dboPattern = Pattern.compile(dbo);
+        Matcher dboMatcher = dboPattern.matcher(object);
+        return dboMatcher.find();
     }
 }
 
