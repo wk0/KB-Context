@@ -29,6 +29,7 @@ public class App {
         ResourceObject obama = new ResourceObject(obamaResource);
         ResourceObject abe   = new ResourceObject(abeResource);
 
+        /*
         obama.printBoth();
         abe.printBoth();
 
@@ -37,10 +38,111 @@ public class App {
 
         System.out.println("Random Abe Property: "+abe.getRandomProperty().toString());
         System.out.println("Random Abe Resource: "+abe.getRandomTypeResource().toString());
+		*/
+
+		RandomWalk r = new RandomWalk(obama);
+		int numberOfSteps = 10;
+		for(int i = 0; i < numberOfSteps; i++){
+			r.takeStep();
+		}
 
 
     }
 }
+
+class RandomWalk{
+	ResourceObject seed;
+	ArrayList<ResourceObject> chain;
+
+	public RandomWalk(ResourceObject ro){
+		ArrayList<ResourceObject> chain = new ArrayList<ResourceObject>();
+		this.seed = ro;
+		chain.add(ro);
+		this.chain = chain;
+	}
+
+	public void takeStep(){
+		ResourceObject previous = chain.get(chain.size() - 1);
+
+		Resource previousResource = previous.getOriginalResource();
+		Property previousRandomProperty = previous.getRandomProperty();
+
+		int rerollCount = 0;
+		while(previousRandomProperty == null){
+			if(rerollCount > 3){
+				return;
+			}
+			//System.out.println("Reroll previousRandomProperty");
+			previousRandomProperty = previous.getRandomProperty();
+			rerollCount++;
+		}
+
+
+
+		NodeIterator candidates = dbpediaInfModel.listObjectsOfProperty(previousResource, previousRandomProperty);
+
+		ArrayList<Literal> nextLiteral = new ArrayList<Literal>();
+		ArrayList<Resource> nextResource = new ArrayList<Resource>();
+
+		while(candidates.hasNext()){
+			RDFNode node = candidates.next();
+
+			if(node.isLiteral()){
+				nextLiteral.add(node.asLiteral());
+			}
+			if(node.isResource()){
+				nextResource.add(node.asResource());
+			}
+		}
+
+		while(nextResource.isEmpty()){
+			//Reroll
+			nextLiteral.clear();
+			nextResource.clear();
+
+			previousRandomProperty = previous.getRandomProperty();
+
+			int rerollCount2 = 0;
+			while(previousRandomProperty == null){
+				if(rerollCount2 > 3){
+					return;
+				}
+				//System.out.println("Reroll previousRandomProperty");
+				previousRandomProperty = previous.getRandomProperty();
+				rerollCount2++;
+			}
+
+			NodeIterator newCandidates = dbpediaInfModel.listObjectsOfProperty(previousResource, previousRandomProperty);
+
+			while(newCandidates.hasNext()){
+				RDFNode newNode = newCandidates.next();
+
+				if(newNode.isLiteral()){
+					nextLiteral.add(newNode.asLiteral());
+				}
+				if(newNode.isResource()){
+					nextResource.add(newNode.asResource());
+				}
+			}
+
+		}
+
+
+
+		Resource resultResource = nextResource.get(new Random().nextInt(nextResource.size()));
+
+		System.out.println(previousResource + " " + previousRandomProperty + " " + resultResource);
+		System.out.println();
+
+
+		ResourceObject next = new ResourceObject(resultResource);
+		chain.add(next);
+
+		// Currently going to only use Resources, soon will use literals
+		return;
+	}
+}
+
 
 class ResourceObject{
 	Resource resource;
@@ -53,17 +155,31 @@ class ResourceObject{
 		this.propertyList = getResourcePropertyList(r);
 	}
 
+	public Resource getOriginalResource(){
+		return resource;
+	}
 	public ArrayList<Resource> getResourceTypeList(){
 		return typeList;
 	}
 	public ArrayList<Property> getPropertyList(){
 		return propertyList;
 	}
+
+	// Evenly distributed??? With removed duplicated may
+	// bias toward those without since duplicates were pruned
 	public Resource getRandomTypeResource(){
+		if(typeList.isEmpty()){
+			return null;
+		}
+
 		Resource randomTypeResource = typeList.get(new Random().nextInt(typeList.size()));
 		return randomTypeResource;
 	}
 	public Property getRandomProperty(){
+		if(propertyList.isEmpty()){
+			return null;
+		}
+
 		Property randomProperty = propertyList.get(new Random().nextInt(propertyList.size()));
 		return randomProperty;
 	}
